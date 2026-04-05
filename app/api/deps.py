@@ -6,6 +6,8 @@ from app.core.security import verify_password
 from app.crud.user import get_user_by_email
 from app.core.config import settings
 from app.models.user import Role
+from app.models.user import User
+from app.db.session import get_db
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
@@ -19,7 +21,7 @@ async def get_current_user(db: AsyncSession = Depends(get_db), token: str = Depe
     except JWTError:
         raise credentials_exception
     user = await get_user_by_email(db, email=email)
-    if not user or not verify_password(token, user.hashed_password):  # Simplified; use payload.id
+    if not user:  # Simplified; use payload.id
         raise credentials_exception
     return user
 
