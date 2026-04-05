@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.schemas.user import UserCreate, UserOut, Token
 from app.core.security import get_password_hash, verify_password, create_access_token
@@ -8,7 +9,7 @@ from sqlalchemy import select
 
 router = APIRouter()
 
-# 👉 Register User
+#  Register User
 @router.post("/register", response_model=UserOut)
 async def register(user_in: UserCreate, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(User).where(User.email == user_in.email))
@@ -31,7 +32,7 @@ async def register(user_in: UserCreate, db: AsyncSession = Depends(get_db)):
     return new_user
 
 
-# 👉 Login User
+#  Login User
 @router.post("/login", response_model=Token)
 async def login(email: str, password: str, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(User).where(User.email == email))
@@ -43,3 +44,13 @@ async def login(email: str, password: str, db: AsyncSession = Depends(get_db)):
     access_token = create_access_token(data={"sub": user.email})
 
     return {"access_token": access_token}
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/users/login")
+
+async def get_current_user(token: str = Depends(oauth2_scheme)):
+    return token
+
+
+@router.get("/me")
+async def get_me(token: str = Depends(get_current_user)):
+    return {"message": "You are authorized", "token": token}
