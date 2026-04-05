@@ -1,8 +1,6 @@
 from sqlalchemy import Column, Integer, String, Enum
-from sqlalchemy.ext.declarative import declarative_base
+from app.db.base import Base
 from enum import Enum as PyEnum
-
-Base = declarative_base()
 
 class Role(str, PyEnum):
     VIEWER = "viewer"
@@ -15,6 +13,7 @@ class Status(str, PyEnum):
 
 class User(Base):
     __tablename__ = "users"
+
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True)
     email = Column(String, unique=True, index=True)

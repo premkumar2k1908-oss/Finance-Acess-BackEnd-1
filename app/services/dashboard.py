@@ -1,5 +1,6 @@
 from sqlalchemy import func, case
 from sqlalchemy.future import select
+from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.record import FinancialRecord
 
 async def get_dashboard_summary(db: AsyncSession, user_id: int):
